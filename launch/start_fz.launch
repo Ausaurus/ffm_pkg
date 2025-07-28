@@ -1,0 +1,7 @@
+<launch>
+    <node pkg="ffm_pkg" name="yolo_detector" type="yolo_detection.py" output="screen" />
+    <node pkg="ffm_pkg" name="depth_rgb_image_listener" type="aligned_depth_rgb.py" output="screen" />
+    <node pkg="ffm_pkg" name="zed_filter" type="aligned_depth_rgb_pyzed.py" output="screen" />
+    <include file="$(find kobuki_node)/launch/minimal.launch" />
+    <include file="$(find zed_wrapper)/launch/zed.launch" />
+</launch>
