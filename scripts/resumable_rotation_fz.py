@@ -9,9 +9,10 @@ from std_msgs.msg import Bool
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 import tf.transformations as tf_trans
+from std_srvs.srv import *
 
 from tts_utils import play_audio
-from config import BASE_PATH
+from config import BASE_PATH, CHAR_PATH
 
 class MainGreeting:
     def __init__(self):
@@ -24,13 +25,22 @@ class MainGreeting:
 
         self.person_centered = False
         self.initial_check_done = False
-        self.start_yaw = None
-        self.current_yaw = None
+        self.start_yaw = 0
+        self.current_yaw = 0
         self.angle_turned = 0
-        self.resume_rotation = False
+        self.resume_rotation = True
         self.guest_count = 0
         self.current_room = "Unknown Room"  # Initialize current_room
-        
+        self.capture = False
+
+        rospy.loginfo("waiting for capture_image service")
+        rospy.wait_for_service("capture_image")
+        rospy.loginfo("waiting for next_way service")
+        rospy.wait_for_service("next_way")
+        self.capture_image = rospy.ServiceProxy("capture_image", Trigger)
+        self.go_to_next_way = rospy.ServiceProxy("next_way", SetBool)
+
+
         self.rate = rospy.Rate(10)
 
         # Launch the general.launch file
@@ -46,13 +56,13 @@ class MainGreeting:
         self.initial_check_done = True
 
     def resume_rotation_callback(self, msg):
-        self.resume_rotation = msg.data
+        self.resume_rotation = msg
 
     def odom_callback(self, msg):
         orientation_q = msg.pose.pose.orientation
         orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
         _, _, yaw = tf_trans.euler_from_quaternion(orientation_list)
-        
+
         self.current_yaw = yaw
 
         if self.start_yaw is None:
@@ -70,13 +80,13 @@ class MainGreeting:
             return True
         except OSError:
             return False
-        
+
     def clear_json_file(self):
         json_file_path = os.path.join(BASE_PATH, "guest_details.json")
         with open(json_file_path, 'w') as file:
             json.dump([], file)  # Write an empty list to clear the file
         rospy.loginfo("Cleared guest details JSON file.")
-        
+
     def trigger_gemini_photo(self):
         gemini_photo_path = os.path.join(BASE_PATH, "scripts/gemini_photo.py")
         rospy.loginfo(f"Guest {self.guest_count} detected! Triggering gemini_photo.py...")
@@ -103,7 +113,7 @@ class MainGreeting:
 
     def run_comparison(self):
         has_internet = self.check_internet_connection()
-        
+
         if has_internet:
             compare_script_path = os.path.join(BASE_PATH, "scripts/gemini_compare.py")
             rospy.loginfo("Running online guest comparison...")
@@ -133,21 +143,30 @@ class MainGreeting:
                 twist.angular.z = 0
                 self.vel_pub.publish(twist)
                 self.start_yaw = self.current_yaw
-                
+
                 self.activate_pub.publish(True)
                 rospy.loginfo("Published True to /activate_model")
 
                 self.guest_count += 1
-                
+
                 rospy.loginfo("Waiting for gemini_photo.py to complete...")
-                self.trigger_gemini_photo()  # Call the gemini_photo.py script
-                self.run_comparison()
+                # self.trigger_gemini_photo()  # Call the gemini_photo.py script
+                # self.run_comparison()
+                response_img = self.capture_image()
+                self.capture = response_img.success
+
+                if self.capture:
+                    launch_file = os.path.join(CHAR_PATH, "launch/interact.launch")
+                    self.general_launch_process = subprocess.Popen(["roslaunch", launch_file])
+                    rospy.loginfo("Launched general.launch")
+                    self.capture = False
+                    self.resume_rotation = False
 
                 # Wait until the resume rotation signal is received
                 rospy.loginfo("Waiting for /resume_rotation to be True...")
                 while not self.resume_rotation and not rospy.is_shutdown():
                     self.rate.sleep()
-                
+
                 rospy.loginfo("Resuming rotation after receiving /resume_rotation signal.")
 
                 angle = self.calculate_angle_turned(self.start_yaw, self.current_yaw)
@@ -157,9 +176,11 @@ class MainGreeting:
                     self.vel_pub.publish(twist)
                     angle = self.calculate_angle_turned(self.start_yaw, self.current_yaw)
                     self.rate.sleep()
+                rospy.sleep(1.0)
             self.rate.sleep()
             acc_current_yaw = self.current_yaw
             acc_total_angle = self.calculate_angle_turned(acc_start_yaw, acc_current_yaw)
+        self.go_to_next_way(True)
         #self.move_to_operator()
         # self.run_comparison()
 

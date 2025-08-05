@@ -1,4 +1,4 @@
-#!/home/eevee/catkin_ws/src/fz_gemini/.venv/bin/python3
+#!/home/i_h8_ros/catkin_ws/src/fz_gemini/.venv/bin/python3
 
 import rospy
 import os

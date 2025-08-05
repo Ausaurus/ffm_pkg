@@ -12,7 +12,7 @@ class YoloDetector:
         rospy.init_node('yolo_detector', anonymous=True)
         rospy.loginfo("Node initialized")
         self.bridge = CvBridge()
-        self.model = YOLO('/home/manfred/catkin_ws/src/ffm_pkg/yolov8n.pt')
+        self.model = YOLO('/home/i_h8_ros/catkin_ws/src/ffm_pkg/yolov8n.pt')
         self.person_class_id = 0
         self.center_threshold = 20
         self.confidence_threshold = 0.7  # Confidence threshold for detections
@@ -20,7 +20,7 @@ class YoloDetector:
         self.image_sub = rospy.Subscriber('/filter_rgb', Image, self.image_callback)
 
         # Set this to True to enable drawing and streaming
-        self.enable_streaming = True
+        self.enable_streaming = False
 
     def draw_and_stream_bounding_box(self, frame, boxes, num_people, person_at_center):
         """2

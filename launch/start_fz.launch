@@ -1,7 +1,14 @@
 <launch>
     <node pkg="ffm_pkg" name="yolo_detector" type="yolo_detection.py" output="screen" />
     <node pkg="ffm_pkg" name="depth_rgb_image_listener" type="aligned_depth_rgb.py" output="screen" />
-    <node pkg="ffm_pkg" name="zed_filter" type="aligned_depth_rgb_pyzed.py" output="screen" />
-    <include file="$(find kobuki_node)/launch/minimal.launch" />
-    <include file="$(find zed_wrapper)/launch/zed.launch" />
+    <node pkg="ffm_pkg" name="zed_filter" type="depth.py" output="screen" />
+    <node pkg="ffm_pkg" name="start_scripts" type="start_scripts.py" output="screen" />
+    <node pkg="fz_gemini" name="take_photo" type="take_photo.py" output="screen" />
+    <include
+    file="/home/i_h8_ros/ffm_ws/src/kobuki/kobuki_node/launch/robot_with_tf.launch"
+    />
+    <node pkg="map_search" name="read_waypoints" type="read_waypoints.py"/>
+    <include
+    file="/home/i_h8_ros/ffm_ws/src/nav_pkg/launch/nav_nochange.launch"
+    />
 </launch>

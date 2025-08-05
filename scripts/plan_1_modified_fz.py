@@ -51,7 +51,7 @@ class TurtleBotController:
 
     def trigger_gemini_photo(self):
         """Trigger gemini_photo.py script."""
-        gemini_photo_path = os.path.join('/home/eevee/catkin_ws/src/fz_gemini/scripts', 'gemini_photo.py')
+        gemini_photo_path = os.path.join('/home/i_h8_ros/catkin_ws/src/fz_gemini/scripts', 'gemini_photo.py')
         rospy.loginfo("Triggering gemini_photo.py process.")
 
         # Set environment variable to track guest
@@ -61,7 +61,7 @@ class TurtleBotController:
         # Run gemini_photo.py
         subprocess.run([gemini_photo_path], env=env)
         rospy.loginfo("gemini_photo.py process completed.")
-        
+
         self.photo_taken = True  # Mark that the photo has been taken
 
         # Signal to resume rotation/movement
@@ -133,7 +133,7 @@ class TurtleBotController:
 
             if abs(acc_angle_turned) >= abs(max_acc_rad):
                 break
-            
+
             print(f"the paused variable is {self.movement_paused}")
             self.cmd_vel_pub.publish(move_cmd)
             self.rate.sleep()
@@ -179,13 +179,13 @@ class TurtleBotController:
         rospy.sleep(0.5)
         self.linear_x(0.15,0.8)
         rospy.sleep(0.5)
-        self.rotation(0.4,-90)        
+        self.rotation(0.4,-90)
         rospy.sleep(0.5)
         self.linear_x(0.15,0.8)
         rospy.sleep(0.5)
         self.linear_x(0.15,0.7)
         rospy.sleep(0.5)
-        self.rotation(0.4,-90)        
+        self.rotation(0.4,-90)
         rospy.sleep(0.5)
 
 if __name__ == '__main__':
@@ -194,4 +194,4 @@ if __name__ == '__main__':
         controller.execute_movement_plan()
     except rospy.ROSInterruptException:
         pass
- 
+

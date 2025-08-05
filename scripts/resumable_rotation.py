@@ -24,7 +24,7 @@ class MainGreeting:
         self.angle_turned = 0
         self.resume_rotation = False
         self.waypoint_paused = False  # Flag to pause waypoint navigation
-        
+
         self.rate = rospy.Rate(10)
 
     def person_centered_callback(self, msg):
@@ -38,7 +38,7 @@ class MainGreeting:
         orientation_q = msg.pose.pose.orientation
         orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
         _, _, yaw = tf_trans.euler_from_quaternion(orientation_list)
-        
+
         self.current_yaw = yaw
 
         if self.start_yaw is None:
@@ -51,7 +51,7 @@ class MainGreeting:
         return angle
 
     def trigger_gemini_photo(self):
-        gemini_photo_path = os.path.join('/home/manfred/catkin_ws/src/fz_gemini/scripts', 'gemini_photo.py')
+        gemini_photo_path = os.path.join('/home/i_h8_ros/catkin_ws/src/fz_gemini/scripts', 'gemini_photo.py')
         env = os.environ.copy()
         env['GUEST_ID'] = str(1)  # Assuming a guest ID of 1 for this example
 
@@ -81,10 +81,10 @@ class MainGreeting:
                 twist.angular.z = 0
                 self.vel_pub.publish(twist)
                 self.start_yaw = self.current_yaw
-                
+
                 self.activate_pub.publish(True)
                 rospy.loginfo("Published True to /activate_model")
-                
+
                 rospy.loginfo("Waiting for gemini_photo.py to complete...")
                 self.trigger_gemini_photo()  # Call the gemini_photo.py script
 
@@ -92,7 +92,7 @@ class MainGreeting:
                 rospy.loginfo("Waiting for /resume_rotation to be True...")
                 while not self.resume_rotation and not rospy.is_shutdown():
                     self.rate.sleep()
-                
+
                 rospy.loginfo("Resuming rotation after receiving /resume_rotation signal.")
 
                 angle = self.calculate_angle_turned(self.start_yaw, self.current_yaw)
