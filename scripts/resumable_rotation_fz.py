@@ -32,6 +32,7 @@ class MainGreeting:
         self.guest_count = 0
         self.current_room = "Unknown Room"  # Initialize current_room
         self.capture = False
+        self.launched = True
 
         rospy.loginfo("waiting for capture_image service")
         rospy.wait_for_service("capture_image")
