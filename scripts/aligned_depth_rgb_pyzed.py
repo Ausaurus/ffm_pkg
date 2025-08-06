@@ -6,6 +6,7 @@ import numpy as np
 import pyzed.sl as sl
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
+from std_srvs.srv import *
 
 class zed_filter:
     def __init__(self):
@@ -14,6 +15,7 @@ class zed_filter:
         self.win = False
         self.pub_cv2image = rospy.Publisher("/zed2/zed_node/rgb_raw/image_raw_color", Image, queue_size=0)
         self.pub_depthimage = rospy.Publisher("/zed2/zed_node/depth/depth_registered", Image, queue_size=0)
+        self.service = rospy.Service("shut_depth", Trigger, self.shutdown)
         # Create a ZED camera
         self.zed = sl.Camera()
 
@@ -33,6 +35,11 @@ class zed_filter:
         self.runtime = sl.RuntimeParameters()
         self.image = sl.Mat()
         self.depth = sl.Mat()
+
+    def shutdown(self):
+        rospy.sleep(1)
+        rospy.signal_shutdown("shutdown so that characteristics_rs.py can open realsense")
+        return TriggerResponse(success=True, message="depth closed")
 
     def show_window(self):
         key = ''

@@ -55,7 +55,7 @@ def display(input, title):
 def shutdown():
     rospy.sleep(1)
     rospy.signal_shutdown("shutdown so that characteristics_rs.py can open realsense")
-    return TriggerResponse(success=True)
+    return TriggerResponse(success=True, message="depth closed")
 service = rospy.Service("shut_depth", Trigger, shutdown)
 #---------------------------------------------------------------------------------------------------------------------------------
 

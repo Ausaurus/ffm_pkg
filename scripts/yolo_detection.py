@@ -48,7 +48,7 @@ class YoloDetector:
 
         frame_height, frame_width = frame.shape[:2]
         frame_center_x = frame_width // 2
-        results = self.model.predict(frame)
+        results = self.model.predict(frame, verbose=False)
 
         person_at_center = False
         closest_distance = float('inf')

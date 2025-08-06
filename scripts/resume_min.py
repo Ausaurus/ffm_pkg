@@ -112,11 +112,11 @@ class MainGreeting:
 
 
     def move_to_operator(self):
-            """
-            Placeholder function to simulate moving to the operator.
-            """
-            rospy.loginfo("Stopping guest detection. Moving to the operator...")
-            print("Simulating the robot moving to the operator...")
+        """
+        Placeholder function to simulate moving to the operator.
+        """
+        rospy.loginfo("Stopping guest detection. Moving to the operator...")
+        print("Simulating the robot moving to the operator...")
 
     def run_comparison(self):
         has_internet = self.check_internet_connection()
@@ -161,11 +161,8 @@ class MainGreeting:
                 # self.run_comparison()
                 response_img = self.capture_image()
                 self.capture = response_img.success
-                result = self.shutdown_depth()
-
-                self.tts_pub.publish(f"{result.success}")
-
                 if self.capture:
+                    self.general_launch_process.terminate()
                     launch_file = os.path.join(CHAR_PATH, "launch/interact.launch")
                     self.interact_launch_process = subprocess.Popen(["roslaunch", launch_file])
                     rospy.loginfo("Launched general.launch")
@@ -190,8 +187,6 @@ class MainGreeting:
             self.rate.sleep()
             acc_current_yaw = self.current_yaw
             acc_total_angle = self.calculate_angle_turned(acc_start_yaw, acc_current_yaw)
-        self.general_launch_process.terminate()
-        self.interact_launch_process.terminate()
         self.go_to_next_way(True)
         #self.move_to_operator()
         # self.run_comparison()
