@@ -12,7 +12,7 @@ class start_scripts:
         self.go = rospy.ServiceProxy('go_to_waypoint', waypoint)
         self.service = rospy.Service('next_way', SetBool, self.rotation_done)
         rospy.loginfo("start servicee")
-        self.next_waypoint = False
+        self.next_waypoint = True
         self.arrive = False
         self.rotate = "/home/i_h8_ros/ffm_ws/src/ffm_pkg/scripts/resumable_rotation_fz.py"
         self.room_number = 0

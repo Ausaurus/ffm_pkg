@@ -34,6 +34,10 @@ class MainGreeting:
         self.capture = False
         self.launched = True
 
+        launch_file = os.path.join(BASE_PATH, "launch/general.launch")
+        self.general_launch_process = subprocess.Popen(["roslaunch", launch_file])
+        rospy.loginfo("Launched general.launch")
+
         rospy.loginfo("waiting for capture_image service")
         rospy.wait_for_service("capture_image")
         rospy.loginfo("waiting for next_way service")
@@ -45,9 +49,6 @@ class MainGreeting:
         self.rate = rospy.Rate(10)
 
         # Launch the general.launch file
-        launch_file = os.path.join(BASE_PATH, "launch/general.launch")
-        self.general_launch_process = subprocess.Popen(["roslaunch", launch_file])
-        rospy.loginfo("Launched general.launch")
 
         # Clear the JSON file at the start of the session
         self.clear_json_file()
@@ -58,6 +59,7 @@ class MainGreeting:
 
     def resume_rotation_callback(self, msg):
         self.resume_rotation = msg
+        self.interact_launch_process.terminate()
 
     def odom_callback(self, msg):
         orientation_q = msg.pose.pose.orientation
@@ -158,7 +160,7 @@ class MainGreeting:
 
                 if self.capture:
                     launch_file = os.path.join(CHAR_PATH, "launch/interact.launch")
-                    self.general_launch_process = subprocess.Popen(["roslaunch", launch_file])
+                    self.interact_launch_process = subprocess.Popen(["roslaunch", launch_file])
                     rospy.loginfo("Launched general.launch")
                     self.capture = False
                     self.resume_rotation = False
@@ -181,6 +183,8 @@ class MainGreeting:
             self.rate.sleep()
             acc_current_yaw = self.current_yaw
             acc_total_angle = self.calculate_angle_turned(acc_start_yaw, acc_current_yaw)
+        self.general_launch_process.terminate()
+        self.interact_launch_process.terminate()
         self.go_to_next_way(True)
         #self.move_to_operator()
         # self.run_comparison()
